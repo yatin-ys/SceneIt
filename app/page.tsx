@@ -2,37 +2,24 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MediaGrid } from "@/components/MediaGrid";
 import {
-  // TMDBResponse import removed from here
-  // getTrendingMovies,
   getPopularMovies,
-  // getTrendingShows,
   getPopularShows,
   getTopRatedMovies,
   getUpcomingMovies,
   getNowPlayingMovies,
   getTopRatedShows,
 } from "@/lib/tmdb";
-// import { get } from "http";
-// MediaItem might still be needed if you were to type the .results arrays explicitly,
-// but it's also inferred correctly in the current setup.
-// If MediaItem also shows as unused, you can remove it too from page.tsx
-// as MediaGrid itself imports it.
 
 export default async function HomePage() {
-  // Fetch data in parallel
   const [
-    // trendingMoviesData, // Type is inferred as TMDBResponse
-    popularMoviesData, // Type is inferred as TMDBResponse
-    // trendingShowsData, // Type is inferred as TMDBResponse
-    popularShowsData, // Type is inferred as TMDBResponse
+    popularMoviesData,
+    popularShowsData,
     topRatedMoviesData,
     upcomingMoviesData,
     nowPlayingMoviesData,
     topRatedShowsData,
   ] = await Promise.all([
-    // getTrendingMovies("week"),
     getPopularMovies(),
-    // getTrendingShows("week"),
     getPopularShows(),
     getTopRatedMovies(),
     getUpcomingMovies(),
@@ -40,10 +27,7 @@ export default async function HomePage() {
     getTopRatedShows(),
   ]);
 
-  // Accessing .results (which is MediaItem[]) is fine due to type inference
-  // const trendingMovies = trendingMoviesData?.results || [];
   const popularMovies = popularMoviesData?.results || [];
-  // const trendingShows = trendingShowsData?.results || [];
   const popularShows = popularShowsData?.results || [];
   const topRatedMovies = topRatedMoviesData?.results || [];
   const upcomingMovies = upcomingMoviesData?.results || [];
@@ -52,8 +36,6 @@ export default async function HomePage() {
 
   return (
     <main className="container mx-auto px-4 py-8 page-transition">
-      {/* The CineLog h1 that was here is now removed */}
-
       <Tabs defaultValue="movies" className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-6">
           <TabsTrigger value="movies">Movies</TabsTrigger>
@@ -88,11 +70,6 @@ export default async function HomePage() {
         </TabsContent>
 
         <TabsContent value="shows" className="animate-scale-in">
-          {/* <MediaGrid
-            items={trendingShows}
-            mediaType="tv"
-            title="Trending Shows This Week"
-          /> */}
           <MediaGrid
             items={popularShows}
             mediaType="tv"
