@@ -1,4 +1,5 @@
 // app/movies/[category]/page.tsx
+
 import React from "react";
 import {
   getPopularMovies,
@@ -51,25 +52,22 @@ const categoryConfigurations: Record<CategorySlug, CategoryConfig> = {
   },
 };
 
-export async function generateMetadata(props: {
-  params: { category: string };
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ category: string }>;
 }): Promise<Metadata> {
-  const { params } = props;
-  const categoryParam = params.category;
+  const resolvedParams = await params;
+  const categoryParam = resolvedParams.category;
 
-  if (
-    !categoryParam ||
-    !Object.keys(categoryConfigurations).includes(categoryParam)
-  ) {
+  if (!categoryConfigurations[categoryParam as CategorySlug]) {
     return { title: "Movies | CineLog", description: "Browse movies." };
   }
 
-  const categorySlugValidated = categoryParam as CategorySlug;
-  const config = categoryConfigurations[categorySlugValidated];
-
+  const { title } = categoryConfigurations[categoryParam as CategorySlug];
   return {
-    title: `${config.title} | CineLog`,
-    description: `Browse all ${config.title.toLowerCase()}.`,
+    title: `${title} | CineLog`,
+    description: `Browse all ${title.toLowerCase()}.`,
   };
 }
 
@@ -77,10 +75,13 @@ export default async function MovieCategoryPage({
   params,
   searchParams,
 }: {
-  params: { category: string };
-  searchParams?: { [key: string]: string | string[] | undefined };
+  params: Promise<{ category: string }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const categoryParam = params.category;
+  const resolvedParams = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+
+  const categoryParam = resolvedParams.category;
 
   if (
     !categoryParam ||
@@ -93,7 +94,7 @@ export default async function MovieCategoryPage({
   const config = categoryConfigurations[categorySlug];
   if (!config) notFound();
 
-  const pageQueryParam = searchParams?.page;
+  const pageQueryParam = resolvedSearchParams?.page;
   let currentPage = 1;
   if (pageQueryParam) {
     const parsedPage = parseInt(
@@ -211,8 +212,6 @@ export default async function MovieCategoryPage({
 
       {movies.length > 0 ? (
         <div className="grid grid-cols-2 place-items-center sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6">
-          {" "}
-          {/* Added place-items-center, removed xs:grid-cols-2 */}
           {movies.map((movie) => (
             <MediaCard
               key={movie.id}

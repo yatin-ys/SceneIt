@@ -3,7 +3,7 @@ import React from "react";
 import {
   getPopularShows,
   getTopRatedShows,
-//   getUpcomingShows, // Make sure this is imported
+  //   getUpcomingShows, // Make sure this is imported
   TMDBResponse,
 } from "@/lib/tmdb"; // Removed getTrendingShows from here
 import { MediaCard } from "@/components/MediaCard";
@@ -40,33 +40,23 @@ const tvCategoryConfigurations: Record<TVCategorySlug, TVCategoryConfig> = {
     title: "Top Rated TV Shows",
     mediaType: "tv",
   },
-//   upcoming: {
-//     fetchFunction: getUpcomingShows,
-//     title: "Upcoming TV Shows",
-//     mediaType: "tv",
-//   },
+  //   upcoming: {
+  //     fetchFunction: getUpcomingShows,
+  //     title: "Upcoming TV Shows",
+  //     mediaType: "tv",
+  //   },
 };
 
 export async function generateMetadata(props: {
-  params: { category: string };
+  params: Promise<{ category: string }>;
 }): Promise<Metadata> {
-  const { params } = props;
-  const categoryParam = params.category;
+  const { category } = await props.params;
 
-  if (
-    !categoryParam ||
-    !Object.keys(tvCategoryConfigurations).includes(categoryParam)
-  ) {
-    // Fallback metadata if category is not recognized
+  if (!category || !Object.keys(tvCategoryConfigurations).includes(category)) {
     return { title: "TV Shows | CineLog", description: "Browse TV shows." };
   }
 
-  const categorySlugValidated = categoryParam as TVCategorySlug;
-  const config = tvCategoryConfigurations[categorySlugValidated];
-   if (!config) { 
-    return { title: "TV Shows | CineLog", description: "Browse TV shows." };
-  }
-
+  const config = tvCategoryConfigurations[category as TVCategorySlug];
   return {
     title: `${config.title} | CineLog`,
     description: `Browse all ${config.title.toLowerCase()}.`,
@@ -77,23 +67,24 @@ export default async function TVShowCategoryPage({
   params,
   searchParams,
 }: {
-  params: { category: string };
-  searchParams?: { [key: string]: string | string[] | undefined };
+  params: Promise<{ category: string }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const categoryParam = params.category;
+  const { category: categoryParam } = await params;
+  const search = searchParams ? await searchParams : {};
 
   if (
     !categoryParam ||
     !Object.keys(tvCategoryConfigurations).includes(categoryParam)
   ) {
-    notFound(); // If category doesn't match defined slugs, show 404
+    notFound();
   }
 
   const categorySlug = categoryParam as TVCategorySlug;
   const config = tvCategoryConfigurations[categorySlug];
-  if (!config) notFound(); // Should be caught by the includes check above
+  if (!config) notFound();
 
-  const pageQueryParam = searchParams?.page;
+  const pageQueryParam = search.page;
   let currentPage = 1;
   if (pageQueryParam) {
     const parsedPage = parseInt(
@@ -103,14 +94,14 @@ export default async function TVShowCategoryPage({
     if (!isNaN(parsedPage) && parsedPage > 0) {
       currentPage = parsedPage;
     } else {
-      notFound(); // Invalid page number (e.g., 0, negative, or not a number)
+      notFound();
     }
   }
 
   const data = await config.fetchFunction(currentPage);
   const items = data?.results || [];
   // totalPages directly from API, capped at 500 by TMDB for these endpoints usually
-  const totalPages = Math.min(data?.total_pages || 1, 500); 
+  const totalPages = Math.min(data?.total_pages || 1, 500);
 
   // If requested page is beyond actual total pages (and not page 1 for an empty category)
   if (currentPage > totalPages && totalPages > 0 && currentPage !== 1) {
@@ -121,7 +112,6 @@ export default async function TVShowCategoryPage({
   if (currentPage > 1 && totalPages === 0) {
     notFound();
   }
-
 
   const renderPaginationItems = () => {
     const pageNumbers = [];
@@ -138,22 +128,34 @@ export default async function TVShowCategoryPage({
       totalPages - 1, // Use totalPages directly
       currentPage + pagesToShowAroundCurrent
     );
-    
+
     const displayedRangeLength = endPage - startPage + 1;
     const requiredDynamicPages = 2 * pagesToShowAroundCurrent + 1;
 
     // Adjust range if it's too small due to being near the beginning or end
     if (displayedRangeLength < requiredDynamicPages && totalPages > 1) {
-        if (currentPage < (1 + requiredDynamicPages -1) ) { // near beginning
-            endPage = Math.min(totalPages -1, startPage + requiredDynamicPages - displayedRangeLength);
-        } else if (currentPage > totalPages - (requiredDynamicPages -1) ) { // near end
-            startPage = Math.max(2, endPage - requiredDynamicPages + displayedRangeLength);
-        }
+      if (currentPage < 1 + requiredDynamicPages - 1) {
+        // near beginning
+        endPage = Math.min(
+          totalPages - 1,
+          startPage + requiredDynamicPages - displayedRangeLength
+        );
+      } else if (currentPage > totalPages - (requiredDynamicPages - 1)) {
+        // near end
+        startPage = Math.max(
+          2,
+          endPage - requiredDynamicPages + displayedRangeLength
+        );
+      }
     }
     // Ensure startPage is not greater than endPage if totalPages is small
-    if (startPage > endPage && totalPages > 1 && totalPages <= (1 + requiredDynamicPages)) {
-        startPage = 2;
-        endPage = totalPages -1;
+    if (
+      startPage > endPage &&
+      totalPages > 1 &&
+      totalPages <= 1 + requiredDynamicPages
+    ) {
+      startPage = 2;
+      endPage = totalPages - 1;
     }
 
     // Page 1
@@ -188,7 +190,8 @@ export default async function TVShowCategoryPage({
     }
 
     // Ellipsis before last page
-    if (endPage < totalPages - 1) // Use totalPages directly
+    if (endPage < totalPages - 1)
+      // Use totalPages directly
       pageNumbers.push(React.cloneElement(ellipsis, { key: "end-ellipsis" }));
 
     // Last Page (if totalPages > 1)
@@ -221,11 +224,7 @@ export default async function TVShowCategoryPage({
       {items.length > 0 ? (
         <div className="grid grid-cols-2 place-items-center sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6">
           {items.map((item) => (
-            <MediaCard
-              key={item.id}
-              item={item}
-              mediaType={config.mediaType}
-            />
+            <MediaCard key={item.id} item={item} mediaType={config.mediaType} />
           ))}
         </div>
       ) : (
