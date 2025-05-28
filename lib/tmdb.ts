@@ -117,3 +117,29 @@ export async function getUpcomingMovies(
     },
   });
 }
+
+
+export interface CastMember {
+  id: number;
+  name: string;
+  character: string;
+  profile_path: string | null;
+  order: number; // The order of the cast member in the credits
+}
+
+export interface CrewMember {
+  id: number;
+  name: string;
+  job: string; // e.g., "Director", "Producer"
+  department: string;
+}
+
+export interface CreditsResponse {
+  id: number; // Movie ID
+  cast: CastMember[];
+  crew: CrewMember[];
+}
+
+export async function getMovieCredits(movieId: string): Promise<CreditsResponse> {
+  return fetchTMDB(`movie/${movieId}/credits`);
+}
