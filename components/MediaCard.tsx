@@ -21,7 +21,7 @@ export function MediaCard({ item, mediaType }: MediaCardProps) {
 
   return (
     // Main card container: Handles overall shape, shadow, and importantly, clips its children.
-    <div className="w-36 sm:w-40 md:w-44 flex flex-col flex-shrink-0 rounded-lg shadow-md overflow-hidden bg-card">
+    <div className="w-36 sm:w-40 md:w-44 flex flex-col flex-shrink-0 rounded-lg shadow-md overflow-hidden bg-card hover-lift animate-fade-in">
       {" "}
       {/* Added bg-card for consistency if using Shadcn theme */}
       {/* 
@@ -41,7 +41,7 @@ export function MediaCard({ item, mediaType }: MediaCardProps) {
             src={`${IMAGE_BASE_URL}${item.poster_path}`}
             alt={title || "Media Poster"}
             fill
-            className="object-cover" // Image will cover this container
+            className="object-cover transition-transform duration-300 hover:scale-105" // Image will cover this container
             sizes="(min-width: 768px) 176px, (min-width: 640px) 160px, 144px" // Your existing sizes
           />
         ) : (
@@ -62,7 +62,7 @@ export function MediaCard({ item, mediaType }: MediaCardProps) {
         >
           {title || "Untitled"}
         </div>
-        <div className="text-xs text-muted-foreground mb-1.5">{year}</div>
+        <div className="text-xs text-muted-foreground mb-1.5 transition-colors duration-200">{year}</div>
         <div className="mt-auto">
           <Badge
             variant={
@@ -72,7 +72,7 @@ export function MediaCard({ item, mediaType }: MediaCardProps) {
                 ? "secondary"
                 : "destructive"
             }
-            className="text-[10px] px-1.5 py-0.5"
+            className="text-[10px] px-1.5 py-0.5 transition-all duration-200 hover:scale-105"
           >
             ★ {rating}
           </Badge>

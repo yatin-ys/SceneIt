@@ -51,7 +51,7 @@ export default async function HomePage() {
   const topRatedShows = topRatedShowsData?.results || [];
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <main className="container mx-auto px-4 py-8 page-transition">
       {/* The CineLog h1 that was here is now removed */}
 
       <Tabs defaultValue="movies" className="w-full">
@@ -60,7 +60,7 @@ export default async function HomePage() {
           <TabsTrigger value="shows">TV Shows</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="movies">
+        <TabsContent value="movies" className="animate-scale-in">
           <MediaGrid
             items={nowPlayingMovies}
             mediaType="movie"
@@ -87,7 +87,7 @@ export default async function HomePage() {
           />
         </TabsContent>
 
-        <TabsContent value="shows">
+        <TabsContent value="shows" className="animate-scale-in">
           {/* <MediaGrid
             items={trendingShows}
             mediaType="tv"
