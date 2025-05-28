@@ -38,7 +38,6 @@ export default async function MoviePage({ params: paramsPromise }: { params: Pro
     ]);
     movie = movieData;
     credits = creditsData;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     console.error("Failed to fetch movie data or credits for ID:", movieId, error);
     notFound();
@@ -108,7 +107,7 @@ export default async function MoviePage({ params: paramsPromise }: { params: Pro
             <h1 className="text-4xl font-bold mb-4">{movie.title}</h1>
             {movie.tagline && (
               <p className="text-lg text-muted-foreground italic mb-4">
-                "{movie.tagline}"
+                &quot;{movie.tagline}&quot;
               </p>
             )}
 
