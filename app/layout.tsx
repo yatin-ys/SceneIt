@@ -1,9 +1,12 @@
+// app/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { DarkModeToggle } from "@/components/dark-mode-toggle";
 import "./globals.css";
-import Link from "next/link"; // Import Link
+import Link from "next/link";
+import { Suspense } from "react"; // <-- Add Suspense
+import { SearchInput } from "@/components/SearchInput"; // <-- Client component
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
         <ThemeProvider
           attribute="class"
@@ -36,33 +39,27 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {/* START: New Header Section */}
           <header className="container mx-auto px-4 py-6 sm:py-8">
-            <div className="flex flex-col items-center relative">
-              {/* DarkModeToggle - Absolutely Positioned in Top Right */}
-              <div className="absolute right-4 top-4">
+            <div className="flex flex-col items-center relative gap-4 sm:gap-6">
+              <div className="absolute right-0 top-0 sm:right-4 sm:top-4">
                 <DarkModeToggle />
               </div>
-
               <Link href="/" className="inline-block">
-                <h1 className="text-7xl font-bold text-center tracking-tight leading-tight">
+                <h1 className="text-6xl sm:text-7xl font-bold text-center tracking-tight leading-tight">
                   SceneIt
                 </h1>
               </Link>
+              {/* Wrapped SearchInput in Suspense */}
+              <div className="w-full max-w-md mt-2">
+                <Suspense fallback={null}>
+                  <SearchInput />
+                </Suspense>
+              </div>
             </div>
           </header>
-          {/* END: New Header Section */}
-          {/* Main content area for pages */}
           <main className="flex-grow container mx-auto px-4 pb-8">
-            {" "}
-            {/* Added container and padding for main content */}
             {children}
           </main>
-
-          {/* Optional: A global footer could go here */}
-          {/* <footer className="container mx-auto px-4 py-6 text-center text-muted-foreground border-t">
-            © {new Date().getFullYear()} SceneIt
-          </footer> */}
         </ThemeProvider>
       </body>
     </html>

@@ -118,7 +118,6 @@ export async function getUpcomingMovies(
   });
 }
 
-
 export interface CastMember {
   id: number;
   name: string;
@@ -140,6 +139,43 @@ export interface CreditsResponse {
   crew: CrewMember[];
 }
 
-export async function getMovieCredits(movieId: string): Promise<CreditsResponse> {
+export async function getMovieCredits(
+  movieId: string
+): Promise<CreditsResponse> {
   return fetchTMDB(`movie/${movieId}/credits`);
+}
+
+export interface MediaItem {
+  id: number;
+  poster_path: string | null;
+  backdrop_path: string | null;
+  title?: string; // Movie title
+  name?: string; // TV show name
+  release_date?: string;
+  first_air_date?: string;
+  vote_average: number;
+  overview: string;
+  runtime?: number;
+  status?: string;
+  genres?: { id: number; name: string }[];
+  original_language?: string;
+  production_countries?: { iso_3166_1: string; name: string }[];
+  budget?: number;
+  revenue?: number;
+  tagline?: string;
+  media_type?: "movie" /* | 'tv' | 'person' */; // Useful for search/multi
+}
+
+export async function searchMovies(
+  query: string,
+  page: number = 1
+): Promise<TMDBResponse> {
+  if (!query.trim()) {
+    // Return an empty response if the query is empty to avoid unnecessary API calls
+    // and handle it gracefully on the search page.
+    return { page: 1, results: [], total_pages: 0, total_results: 0 };
+  }
+  return fetchTMDB("search/movie", {
+    params: { query, page, include_adult: false },
+  });
 }
