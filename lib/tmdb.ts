@@ -118,12 +118,28 @@ export async function getUpcomingMovies(
   });
 }
 
-export async function getPopularShows(page: number = 1): Promise<TMDBResponse> {
-  return fetchTMDB("tv/popular", { params: { page } });
+
+export interface CastMember {
+  id: number;
+  name: string;
+  character: string;
+  profile_path: string | null;
+  order: number; // The order of the cast member in the credits
 }
 
-export async function getTopRatedShows(
-  page: number = 1
-): Promise<TMDBResponse> {
-  return fetchTMDB("tv/top_rated", { params: { page } });
+export interface CrewMember {
+  id: number;
+  name: string;
+  job: string; // e.g., "Director", "Producer"
+  department: string;
+}
+
+export interface CreditsResponse {
+  id: number; // Movie ID
+  cast: CastMember[];
+  crew: CrewMember[];
+}
+
+export async function getMovieCredits(movieId: string): Promise<CreditsResponse> {
+  return fetchTMDB(`movie/${movieId}/credits`);
 }

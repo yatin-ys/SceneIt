@@ -1,22 +1,52 @@
 import Image from "next/image";
-import { getMovieDetails } from "@/lib/tmdb";
+import { getMovieDetails, getMovieCredits, CastMember, CrewMember } from "@/lib/tmdb";
 import { Badge } from "@/components/ui/badge";
 import { PaginationLink } from "@/components/ui/pagination";
 import { notFound } from "next/navigation";
 
 const IMAGE_BASE_URL = process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL || "https://image.tmdb.org/t/p/original";
 
-export default async function MoviePage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = await params;
+// Helper function to find crew members by job
+const findCrewMembers = (crew: CrewMember[], job: string, limit: number = 2): string[] => {
+  return crew
+    .filter((member) => member.job === job)
+    .slice(0, limit)
+    .map((member) => member.name);
+};
+
+// Helper function to get top cast members
+const getTopCast = (cast: CastMember[], limit: number = 5): string[] => {
+  return cast
+    .sort((a, b) => a.order - b.order)
+    .slice(0, limit)
+    .map((member) => member.name);
+};
+
+export default async function MoviePage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  // Await the params promise to resolve
+  const params = await paramsPromise;
+  const movieId = params.id;
   
   let movie;
+  let credits;
+
   try {
-    movie = await getMovieDetails(resolvedParams.id);
+    // Fetch movie details and credits in parallel
+    const [movieData, creditsData] = await Promise.all([
+      getMovieDetails(movieId),
+      getMovieCredits(movieId),
+    ]);
+    movie = movieData;
+    credits = creditsData;
   } catch (error) {
+    console.error("Failed to fetch movie data or credits for ID:", movieId, error);
     notFound();
   }
 
-  if (!movie) {
+  if (!movie || !credits) {
+    // This check might be redundant if notFound() is called in catch,
+    // but good for safety if Promise.all resolves with partial/null data somehow.
+    console.error("Movie or credits data is missing for ID:", movieId);
     notFound();
   }
 
@@ -33,6 +63,10 @@ export default async function MoviePage({ params }: { params: Promise<{ id: stri
     : "Runtime unknown";
 
   const rating = movie.vote_average?.toFixed(1) || "N/A";
+
+  const directors = findCrewMembers(credits.crew, "Director");
+  const producers = findCrewMembers(credits.crew, "Producer", 3);
+  const actors = getTopCast(credits.cast, 6);
 
   return (
     <main className="container mx-auto px-4 py-8">
@@ -73,7 +107,7 @@ export default async function MoviePage({ params }: { params: Promise<{ id: stri
             <h1 className="text-4xl font-bold mb-4">{movie.title}</h1>
             {movie.tagline && (
               <p className="text-lg text-muted-foreground italic mb-4">
-                "{movie.tagline}"
+                &quot;{movie.tagline}&quot;
               </p>
             )}
 
@@ -117,8 +151,28 @@ export default async function MoviePage({ params }: { params: Promise<{ id: stri
               </div>
             )}
 
-            {/* Additional Details */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Starring (Actors) */}
+            {actors.length > 0 && (
+              <div className="mb-6">
+                <h2 className="text-lg font-semibold mb-2">Starring</h2>
+                <p className="text-muted-foreground">{actors.join(", ")}</p>
+              </div>
+            )}
+
+            {/* Additional Details including Director and Producers */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+              {directors.length > 0 && (
+                <div>
+                  <h2 className="text-sm font-semibold">Directed by</h2>
+                  <p className="text-muted-foreground">{directors.join(", ")}</p>
+                </div>
+              )}
+              {producers.length > 0 && (
+                <div>
+                  <h2 className="text-sm font-semibold">Produced by</h2>
+                  <p className="text-muted-foreground">{producers.join(", ")}</p>
+                </div>
+              )}
               {movie.original_language && (
                 <div>
                   <h2 className="text-sm font-semibold">Language</h2>
@@ -141,7 +195,7 @@ export default async function MoviePage({ params }: { params: Promise<{ id: stri
                 <div>
                   <h2 className="text-sm font-semibold">Budget</h2>
                   <p className="text-muted-foreground">
-                    ${movie.budget.toLocaleString()}
+                    ${movie.budget.toLocaleString('en-US')}
                   </p>
                 </div>
               )}
@@ -149,7 +203,7 @@ export default async function MoviePage({ params }: { params: Promise<{ id: stri
                 <div>
                   <h2 className="text-sm font-semibold">Revenue</h2>
                   <p className="text-muted-foreground">
-                    ${movie.revenue.toLocaleString()}
+                    ${movie.revenue.toLocaleString('en-US')}
                   </p>
                 </div>
               )}

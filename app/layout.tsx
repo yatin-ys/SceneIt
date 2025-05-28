@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CineLog",
-  description: "Media tracking web app.",
+  title: "SceneIt",
+  description: "Movie tracking web app.",
 };
 
 export default function RootLayout({
@@ -44,10 +44,9 @@ export default function RootLayout({
                 <DarkModeToggle />
               </div>
 
-              {/* CineLog Title */}
               <Link href="/" className="inline-block">
                 <h1 className="text-7xl font-bold text-center tracking-tight leading-tight">
-                  CineLog
+                  SceneIt
                 </h1>
               </Link>
             </div>
@@ -62,7 +61,7 @@ export default function RootLayout({
 
           {/* Optional: A global footer could go here */}
           {/* <footer className="container mx-auto px-4 py-6 text-center text-muted-foreground border-t">
-            © {new Date().getFullYear()} CineLog
+            © {new Date().getFullYear()} SceneIt
           </footer> */}
         </ThemeProvider>
       </body>
