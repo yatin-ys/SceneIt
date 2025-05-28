@@ -12,6 +12,7 @@ export default async function MoviePage({ params }: { params: Promise<{ id: stri
   let movie;
   try {
     movie = await getMovieDetails(resolvedParams.id);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     notFound();
   }
@@ -73,7 +74,7 @@ export default async function MoviePage({ params }: { params: Promise<{ id: stri
             <h1 className="text-4xl font-bold mb-4">{movie.title}</h1>
             {movie.tagline && (
               <p className="text-lg text-muted-foreground italic mb-4">
-                "{movie.tagline}"
+                &quot;{movie.tagline}&quot;
               </p>
             )}
 
@@ -141,7 +142,7 @@ export default async function MoviePage({ params }: { params: Promise<{ id: stri
                 <div>
                   <h2 className="text-sm font-semibold">Budget</h2>
                   <p className="text-muted-foreground">
-                    ${movie.budget.toLocaleString()}
+                    ${movie.budget.toLocaleString('en-US')}
                   </p>
                 </div>
               )}
@@ -149,7 +150,7 @@ export default async function MoviePage({ params }: { params: Promise<{ id: stri
                 <div>
                   <h2 className="text-sm font-semibold">Revenue</h2>
                   <p className="text-muted-foreground">
-                    ${movie.revenue.toLocaleString()}
+                    ${movie.revenue.toLocaleString('en-US')}
                   </p>
                 </div>
               )}
