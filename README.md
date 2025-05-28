@@ -9,7 +9,7 @@ Install - https://nodejs.org/en/download
 
 ```bash
 git clone https://github.com/yatin-ys/SceneIt.git
-cd CineLog
+cd SceneIt
 ```
 
 2. Install Dependencies

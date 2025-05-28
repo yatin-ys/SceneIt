@@ -61,12 +61,12 @@ export async function generateMetadata({
   const categoryParam = resolvedParams.category;
 
   if (!categoryConfigurations[categoryParam as CategorySlug]) {
-    return { title: "Movies | CineLog", description: "Browse movies." };
+    return { title: "Movies | SceneIt", description: "Browse movies." };
   }
 
   const { title } = categoryConfigurations[categoryParam as CategorySlug];
   return {
-    title: `${title} | CineLog`,
+    title: `${title} | SceneIt`,
     description: `Browse all ${title.toLowerCase()}.`,
   };
 }
