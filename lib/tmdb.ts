@@ -122,12 +122,18 @@ export async function getUpcomingMovies(
 }
 
 // --- TV Shows ---
-export async function getTrendingShows(
-  timeWindow: "day" | "week" = "week"
-): Promise<TMDBResponse> {
-  return fetchTMDB(`trending/tv/${timeWindow}`);
-}
+// export async function getTrendingShows(
+//   timeWindow: "day" | "week" = "week"
+// ): Promise<TMDBResponse> {
+//   return fetchTMDB(`trending/tv/${timeWindow}`);
+// }
 
 export async function getPopularShows(page: number = 1): Promise<TMDBResponse> {
   return fetchTMDB("tv/popular", { params: { page } });
+}
+
+export async function getTopRatedShows(
+  page: number = 1
+): Promise<TMDBResponse> {
+  return fetchTMDB("tv/top_rated", { params: { page } });
 }
