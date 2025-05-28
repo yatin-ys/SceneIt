@@ -16,8 +16,7 @@ async function fetchTMDB(endpoint: string, options: FetchOptions = {}) {
         ...options.headers,
         "Content-Type": "application/json",
       },
-      // Recommended: Cache TMDB responses for a reasonable time
-      next: { revalidate: 3600 }, // Revalidate every hour
+      next: { revalidate: 3600 },
     });
 
     if (!response.ok) {
@@ -37,38 +36,42 @@ async function fetchTMDB(endpoint: string, options: FetchOptions = {}) {
     return response.json();
   } catch (error) {
     console.error(`Error in fetchTMDB for endpoint ${endpoint}:`, error);
-    // Return a structure that won't break the UI, e.g., an empty results array
     return { results: [], page: 0, total_pages: 0, total_results: 0 };
   }
 }
 
-// Helper function to get current date in YYYY-MM-DD format
 function getCurrentDateFormatted(): string {
   const today = new Date();
   const year = today.getFullYear();
-  const month = (today.getMonth() + 1).toString().padStart(2, "0"); // Months are 0-indexed
+  const month = (today.getMonth() + 1).toString().padStart(2, "0");
   const day = today.getDate().toString().padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
 
-// Helper function to get the end of the current year in YYYY-MM-DD format
 function getEndOfCurrentYearFormatted(): string {
   const today = new Date();
   const year = today.getFullYear();
-  return `${year}-12-31`; // December 31st of the current year
+  return `${year}-12-31`;
 }
 
-// Type definitions (can be expanded for more detail)
 export interface MediaItem {
   id: number;
   poster_path: string | null;
-  title?: string; // For movies
-  name?: string; // For TV shows
-  release_date?: string; // For movies
-  first_air_date?: string; // For TV shows
+  backdrop_path: string | null;
+  title?: string;
+  name?: string;
+  release_date?: string;
+  first_air_date?: string;
   vote_average: number;
   overview: string;
-  // Add other properties you might need
+  runtime?: number;
+  status?: string;
+  genres?: { id: number; name: string }[];
+  original_language?: string;
+  production_countries?: { iso_3166_1: string; name: string }[];
+  budget?: number;
+  revenue?: number;
+  tagline?: string;
 }
 
 export interface TMDBResponse {
@@ -78,12 +81,9 @@ export interface TMDBResponse {
   total_results: number;
 }
 
-// --- Movies ---
-// export async function getTrendingMovies(
-//   timeWindow: "day" | "week" = "week"
-// ): Promise<TMDBResponse> {
-//   return fetchTMDB(`trending/movie/${timeWindow}`);
-// }
+export async function getMovieDetails(movieId: string): Promise<MediaItem> {
+  return fetchTMDB(`movie/${movieId}`);
+}
 
 export async function getNowPlayingMovies(
   page: number = 1
@@ -111,22 +111,12 @@ export async function getUpcomingMovies(
   return fetchTMDB("discover/movie", {
     params: {
       page,
-      "primary_release_date.gte": currentDate, // Greater than or equal to today
+      "primary_release_date.gte": currentDate,
       "primary_release_date.lte": endOfYear,
-      sort_by: "popularity.desc", // Show upcoming movies first
-      // You can add other discover parameters here as needed, e.g.:
-      // with_release_type: '2|3', // 2: Theatrical (limited), 3: Theatrical (general)
-      // 'vote_count.gte': 10, // Optional: filter out movies with very few votes
+      sort_by: "popularity.desc",
     },
   });
 }
-
-// --- TV Shows ---
-// export async function getTrendingShows(
-//   timeWindow: "day" | "week" = "week"
-// ): Promise<TMDBResponse> {
-//   return fetchTMDB(`trending/tv/${timeWindow}`);
-// }
 
 export async function getPopularShows(page: number = 1): Promise<TMDBResponse> {
   return fetchTMDB("tv/popular", { params: { page } });
