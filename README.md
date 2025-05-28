@@ -8,7 +8,7 @@ Install - https://nodejs.org/en/download
 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yatin-ys/CineLog.git
+git clone https://github.com/yatin-ys/SceneIt.git
 cd CineLog
 ```
 
