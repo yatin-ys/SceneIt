@@ -6,10 +6,12 @@ import { notFound } from "next/navigation";
 
 const IMAGE_BASE_URL = process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL || "https://image.tmdb.org/t/p/original";
 
-export default async function MoviePage({ params }: { params: { id: string } }) {
+export default async function MoviePage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params;
+  
   let movie;
   try {
-    movie = await getMovieDetails(params.id);
+    movie = await getMovieDetails(resolvedParams.id);
   } catch (error) {
     notFound();
   }
