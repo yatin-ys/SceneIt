@@ -16,8 +16,12 @@ export function MediaCard({ item, mediaType }: MediaCardProps) {
   const year = releaseDate ? new Date(releaseDate).getFullYear() : "N/A";
   const rating = item.vote_average ? item.vote_average.toFixed(1) : "N/A";
 
+  const href = mediaType === "movie" 
+    ? `/movies/detail/${item.id}` 
+    : `/shows/${item.id}`;
+
   return (
-    <Link href={`/${mediaType}s/${item.id}`} className="block">
+    <Link href={href} className="block">
       <div className="w-36 sm:w-40 md:w-44 flex flex-col flex-shrink-0 rounded-lg shadow-md overflow-hidden bg-card hover-lift animate-fade-in">
         <div
           className="relative w-full overflow-hidden rounded-t-lg"
