@@ -5,21 +5,29 @@ Install - https://nodejs.org/en/download
 
 ## Getting Started
 
-1. Clone this repo.
+1. Clone the Repository
 
 ```bash
 git clone https://github.com/yatin-ys/CineLog.git
+cd CineLog
 ```
 
-2. Install required packages.
+2. Install Dependencies
 
 ```bash
 npm install
 ```
 
-3. Run the development server:
+3. Start the Development Server
 
 ```bash
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) in your browser to see the result.
+Once the server is running, open your browser and navigate to http://localhost:3000 to view the application.
+
+## Run in Production Mode
+To build and start the app for production:
+```bash
+npm run build
+npm run start
+```
