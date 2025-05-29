@@ -1,7 +1,7 @@
 // app/signup/page.tsx
 import { SignupForm } from "@/components/auth/signup-form";
 import { AuthFormWrapper } from "@/components/auth/auth-form-wrapper";
-import { createClient } from "@/lib/supabase/server"; // Standard import
+import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { SearchParamErrorDisplay } from "@/components/auth/search-param-error-display";
@@ -9,9 +9,11 @@ import { SearchParamErrorDisplay } from "@/components/auth/search-param-error-di
 export default async function SignupPage({
   searchParams,
 }: {
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const supabase = await createClient(); // Key change: await createClient()
+  const resolvedSearchParams = await searchParams;
+  
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -29,7 +31,7 @@ export default async function SignupPage({
       footerLinkText="Sign In"
     >
       <Suspense fallback={<div>Loading...</div>}>
-        <SearchParamErrorDisplay searchParams={searchParams} />
+        <SearchParamErrorDisplay searchParams={resolvedSearchParams} />
       </Suspense>
       <SignupForm />
     </AuthFormWrapper>

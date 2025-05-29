@@ -4,11 +4,11 @@
 import { useEffect } from "react";
 import { toast } from "sonner";
 
-export function SearchParamErrorDisplay({
-  searchParams,
-}: {
+interface SearchParamErrorDisplayProps {
   searchParams?: { [key: string]: string | string[] | undefined };
-}) {
+}
+
+export function SearchParamErrorDisplay({ searchParams }: SearchParamErrorDisplayProps) {
   useEffect(() => {
     const error = searchParams?.error;
     if (error && typeof error === "string") {
