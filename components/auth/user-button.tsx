@@ -14,7 +14,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/app/auth/actions";
-import { LogOut, /*UserCircle, */ LogIn, UserPlus } from "lucide-react";
+import { LogOut, LogIn, UserPlus, UserCircle, ListVideo } from "lucide-react"; // Added UserCircle, ListVideo
 import { toast } from "sonner";
 
 interface UserButtonProps {
@@ -50,15 +50,19 @@ export function UserButton({ user }: UserButtonProps) {
   }
 
   const userEmail = user.email || "User";
-  const fallbackLetter = userEmail.charAt(0).toUpperCase();
+  const fallbackLetter = (user.user_metadata?.full_name || userEmail)
+    .charAt(0)
+    .toUpperCase();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            {/* You can integrate user.user_metadata.avatar_url if available from Google */}
-            <AvatarImage src={user.user_metadata?.avatar_url} alt={userEmail} />
+            <AvatarImage
+              src={user.user_metadata?.avatar_url}
+              alt={user.user_metadata?.full_name || userEmail}
+            />
             <AvatarFallback>{fallbackLetter}</AvatarFallback>
           </Avatar>
         </Button>
@@ -69,21 +73,27 @@ export function UserButton({ user }: UserButtonProps) {
             <p className="text-sm font-medium leading-none">
               {user.user_metadata?.full_name || userEmail}
             </p>
-            {user.user_metadata?.full_name && (
-              <p className="text-xs leading-none text-muted-foreground">
-                {userEmail}
-              </p>
-            )}
+            {user.user_metadata?.full_name &&
+              user.email && ( // Show email only if full_name is also present
+                <p className="text-xs leading-none text-muted-foreground">
+                  {userEmail}
+                </p>
+              )}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {/* Add items like Profile, Settings if needed */}
-        {/* <DropdownMenuItem asChild>
-          <Link href="/profile">
+        <DropdownMenuItem asChild>
+          <Link href="/profile" className="cursor-pointer">
             <UserCircle className="mr-2 h-4 w-4" />
-            Profile
+            <span>Profile</span>
           </Link>
-        </DropdownMenuItem> */}
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/watchlist" className="cursor-pointer">
+            <ListVideo className="mr-2 h-4 w-4" />
+            <span>My Watchlist</span>
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
           <LogOut className="mr-2 h-4 w-4" />

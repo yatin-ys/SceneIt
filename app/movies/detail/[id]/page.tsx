@@ -1,20 +1,35 @@
+// app/movies/detail/[id]/page.tsx
 import Image from "next/image";
-import { getMovieDetails, getMovieCredits, CastMember, CrewMember } from "@/lib/tmdb";
+import {
+  getMovieDetails,
+  getMovieCredits,
+  CastMember,
+  CrewMember,
+  MediaItem,
+} from "@/lib/tmdb";
 import { Badge } from "@/components/ui/badge";
 import { PaginationLink } from "@/components/ui/pagination";
 import { notFound } from "next/navigation";
+import { WatchlistButton } from "@/components/watchlist-button";
+import { createClient } from "@/lib/supabase/server";
+// import { isMovieInWatchlist } from "@/app/watchlist/actions"; // No longer needed for server-side check here
+import type { Metadata } from "next";
 
-const IMAGE_BASE_URL = process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL || "https://image.tmdb.org/t/p/original";
+const IMAGE_BASE_URL =
+  process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL ||
+  "https://image.tmdb.org/t/p/original";
 
-// Helper function to find crew members by job
-const findCrewMembers = (crew: CrewMember[], job: string, limit: number = 2): string[] => {
+const findCrewMembers = (
+  crew: CrewMember[],
+  job: string,
+  limit: number = 2
+): string[] => {
   return crew
     .filter((member) => member.job === job)
     .slice(0, limit)
     .map((member) => member.name);
 };
 
-// Helper function to get top cast members
 const getTopCast = (cast: CastMember[], limit: number = 5): string[] => {
   return cast
     .sort((a, b) => a.order - b.order)
@@ -22,33 +37,98 @@ const getTopCast = (cast: CastMember[], limit: number = 5): string[] => {
     .map((member) => member.name);
 };
 
-export default async function MoviePage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
-  // Await the params promise to resolve
+export async function generateMetadata({
+  params: paramsPromise,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
   const params = await paramsPromise;
-  const movieId = params.id;
-  
-  let movie;
-  let credits;
+  const movieIdStr = params.id;
 
   try {
-    // Fetch movie details and credits in parallel
+    const movie = await getMovieDetails(movieIdStr);
+    if (!movie || !movie.title) {
+      return {
+        title: "Movie Details | SceneIt",
+        description: "Detailed information about a movie.",
+      };
+    }
+    return {
+      title: `${movie.title} | SceneIt`,
+      description: movie.overview || `Details for the movie ${movie.title}.`,
+      openGraph: {
+        title: `${movie.title} | SceneIt`,
+        description: movie.overview || `Details for the movie ${movie.title}.`,
+        images: movie.poster_path
+          ? [`${IMAGE_BASE_URL}${movie.poster_path}`]
+          : [],
+      },
+    };
+  } catch (error) {
+    console.error(
+      "Failed to generate metadata for movie ID:",
+      movieIdStr,
+      error
+    );
+    return {
+      title: "Movie Details | SceneIt",
+      description: "Detailed information about a movie.",
+    };
+  }
+}
+
+export default async function MoviePage({
+  params: paramsPromise,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const params = await paramsPromise;
+  const movieIdStr = params.id;
+  const movieIdNum = parseInt(movieIdStr, 10);
+
+  if (isNaN(movieIdNum)) {
+    console.error("Invalid movie ID format:", movieIdStr);
+    notFound();
+  }
+
+  let movie: MediaItem | null = null;
+  let credits: { cast: CastMember[]; crew: CrewMember[] } | null = null;
+
+  try {
     const [movieData, creditsData] = await Promise.all([
-      getMovieDetails(movieId),
-      getMovieCredits(movieId),
+      getMovieDetails(movieIdStr),
+      getMovieCredits(movieIdStr),
     ]);
     movie = movieData;
     credits = creditsData;
   } catch (error) {
-    console.error("Failed to fetch movie data or credits for ID:", movieId, error);
+    console.error(
+      "Failed to fetch movie data or credits for ID:",
+      movieIdStr,
+      error
+    );
+  }
+
+  if (!movie || !movie.id || !credits) {
+    console.error(
+      "Movie or credits data is missing or incomplete for ID:",
+      movieIdStr
+    );
     notFound();
   }
 
-  if (!movie || !credits) {
-    // This check might be redundant if notFound() is called in catch,
-    // but good for safety if Promise.all resolves with partial/null data somehow.
-    console.error("Movie or credits data is missing for ID:", movieId);
-    notFound();
-  }
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser(); // Still fetch user to pass to WatchlistButton
+
+  // REMOVED: Server-side watchlist check
+  // let initialIsInWatchlist: boolean | undefined = undefined;
+  // if (user) {
+  //   initialIsInWatchlist = await isMovieInWatchlist(movieIdNum);
+  // } else {
+  //   initialIsInWatchlist = false;
+  // }
 
   const releaseDate = movie.release_date
     ? new Date(movie.release_date).toLocaleDateString("en-US", {
@@ -69,19 +149,16 @@ export default async function MoviePage({ params: paramsPromise }: { params: Pro
   const actors = getTopCast(credits.cast, 6);
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <main className="container mx-auto px-4 py-8 page-transition">
       <div className="flex flex-col gap-8">
-        {/* Back Button */}
         <div>
           <PaginationLink href="/" size="sm" className="text-sm">
             ← Back to Home
           </PaginationLink>
         </div>
 
-        {/* Movie Header */}
         <div className="flex flex-col md:flex-row gap-8">
-          {/* Poster */}
-          <div className="w-full md:w-1/3 lg:w-1/4">
+          <div className="w-full md:w-1/3 lg:w-1/4 flex-shrink-0">
             <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-lg">
               {movie.poster_path ? (
                 <Image
@@ -102,7 +179,6 @@ export default async function MoviePage({ params: paramsPromise }: { params: Pro
             </div>
           </div>
 
-          {/* Movie Info */}
           <div className="flex-1">
             <h1 className="text-4xl font-bold mb-4">{movie.title}</h1>
             {movie.tagline && (
@@ -111,7 +187,6 @@ export default async function MoviePage({ params: paramsPromise }: { params: Pro
               </p>
             )}
 
-            {/* Quick Info */}
             <div className="flex flex-wrap gap-3 mb-6">
               <Badge variant="outline">{releaseDate}</Badge>
               <Badge variant="outline">{runtime}</Badge>
@@ -129,7 +204,16 @@ export default async function MoviePage({ params: paramsPromise }: { params: Pro
               {movie.status && <Badge variant="outline">{movie.status}</Badge>}
             </div>
 
-            {/* Genres */}
+            <div className="my-6">
+              <WatchlistButton
+                movieId={movieIdNum}
+                user={user}
+                // initialIsInWatchlist prop is no longer passed
+                className="w-full sm:w-auto"
+                size="lg"
+              />
+            </div>
+
             {movie.genres && movie.genres.length > 0 && (
               <div className="mb-6">
                 <h2 className="text-lg font-semibold mb-2">Genres</h2>
@@ -143,7 +227,6 @@ export default async function MoviePage({ params: paramsPromise }: { params: Pro
               </div>
             )}
 
-            {/* Overview */}
             {movie.overview && (
               <div className="mb-6">
                 <h2 className="text-lg font-semibold mb-2">Overview</h2>
@@ -151,7 +234,6 @@ export default async function MoviePage({ params: paramsPromise }: { params: Pro
               </div>
             )}
 
-            {/* Starring (Actors) */}
             {actors.length > 0 && (
               <div className="mb-6">
                 <h2 className="text-lg font-semibold mb-2">Starring</h2>
@@ -159,18 +241,21 @@ export default async function MoviePage({ params: paramsPromise }: { params: Pro
               </div>
             )}
 
-            {/* Additional Details including Director and Producers */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
               {directors.length > 0 && (
                 <div>
                   <h2 className="text-sm font-semibold">Directed by</h2>
-                  <p className="text-muted-foreground">{directors.join(", ")}</p>
+                  <p className="text-muted-foreground">
+                    {directors.join(", ")}
+                  </p>
                 </div>
               )}
               {producers.length > 0 && (
                 <div>
                   <h2 className="text-sm font-semibold">Produced by</h2>
-                  <p className="text-muted-foreground">{producers.join(", ")}</p>
+                  <p className="text-muted-foreground">
+                    {producers.join(", ")}
+                  </p>
                 </div>
               )}
               {movie.original_language && (
@@ -181,21 +266,22 @@ export default async function MoviePage({ params: paramsPromise }: { params: Pro
                   </p>
                 </div>
               )}
-              {movie.production_countries && movie.production_countries.length > 0 && (
-                <div>
-                  <h2 className="text-sm font-semibold">Country</h2>
-                  <p className="text-muted-foreground">
-                    {movie.production_countries
-                      .map((country) => country.name)
-                      .join(", ")}
-                  </p>
-                </div>
-              )}
+              {movie.production_countries &&
+                movie.production_countries.length > 0 && (
+                  <div>
+                    <h2 className="text-sm font-semibold">Country</h2>
+                    <p className="text-muted-foreground">
+                      {movie.production_countries
+                        .map((country) => country.name)
+                        .join(", ")}
+                    </p>
+                  </div>
+                )}
               {movie.budget !== undefined && movie.budget > 0 && (
                 <div>
                   <h2 className="text-sm font-semibold">Budget</h2>
                   <p className="text-muted-foreground">
-                    ${movie.budget.toLocaleString('en-US')}
+                    ${movie.budget.toLocaleString("en-US")}
                   </p>
                 </div>
               )}
@@ -203,7 +289,7 @@ export default async function MoviePage({ params: paramsPromise }: { params: Pro
                 <div>
                   <h2 className="text-sm font-semibold">Revenue</h2>
                   <p className="text-muted-foreground">
-                    ${movie.revenue.toLocaleString('en-US')}
+                    ${movie.revenue.toLocaleString("en-US")}
                   </p>
                 </div>
               )}
