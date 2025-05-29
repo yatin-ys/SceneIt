@@ -7,6 +7,7 @@ import "./globals.css";
 import Link from "next/link";
 import { Suspense } from "react"; // <-- Add Suspense
 import { SearchInput } from "@/components/SearchInput"; // <-- Client component
+import { Analytics } from '@vercel/analytics/next';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -61,6 +62,7 @@ export default function RootLayout({
             {children}
           </main>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
