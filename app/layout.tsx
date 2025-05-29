@@ -8,6 +8,8 @@ import Link from "next/link";
 import { Suspense } from "react"; // <-- Add Suspense
 import { SearchInput } from "@/components/SearchInput"; // <-- Client component
 import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -63,6 +65,7 @@ export default function RootLayout({
           </main>
         </ThemeProvider>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
