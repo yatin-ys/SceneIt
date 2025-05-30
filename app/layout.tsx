@@ -9,11 +9,9 @@ import { Suspense } from "react";
 import { SearchInput } from "@/components/SearchInput";
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-
-// New imports (were already there, just confirming)
 import { Toaster } from "@/components/ui/sonner";
 import { UserButton } from "@/components/auth/user-button";
-import { createClient } from "@/lib/supabase/server"; // For server-side user fetching
+import { createClient } from "@/lib/supabase/server";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,13 +28,12 @@ export const metadata: Metadata = {
   description: "Movie tracking web app.",
 };
 
-export default async function RootLayout({ // Make it async
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Fetch user on the server
-  const supabase = await createClient(); // Key change: await createClient()
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   return (
@@ -50,41 +47,40 @@ export default async function RootLayout({ // Make it async
           enableSystem
           disableTransitionOnChange
         >
-          <header className="container mx-auto px-4 py-6 sm:py-8">
-            {/* Main header flex container: stacks on small, row on sm+ */}
-            {/* justify-between pushes left and right groups apart on sm+ */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
-
-              {/* Left Part: Title and Search Bar */}
-              {/* Stacks on small, becomes row on sm+. order-2 ensures it's below auth on small screens */}
-              <div className="flex flex-col items-center text-center sm:flex-row sm:items-center sm:text-left gap-2 sm:gap-4 order-2 sm:order-1 w-full sm:w-auto">
-                <Link href="/" className="inline-block flex-shrink-0">
-                  {/* Adjusted title size for better fitting when side-by-side */}
-                  <h1 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight">
+          <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <nav className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4 lg:gap-6 flex-1">
+                <Link 
+                  href="/" 
+                  className="flex items-center gap-2 transition-transform hover:scale-105"
+                >
+                  <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary-foreground bg-clip-text text-transparent">
                     SceneIt
                   </h1>
                 </Link>
-                {/* Search Input: full width on small, constrained on larger */}
-                <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
+                <div className="hidden sm:block w-full max-w-md">
                   <Suspense fallback={null}>
                     <SearchInput />
                   </Suspense>
                 </div>
               </div>
 
-              {/* Right Part: Auth and Dark Mode Toggle */}
-              {/* order-1 ensures it's at the top on small screens */}
-              <div className="flex items-center gap-2 order-1 sm:order-2">
-                <UserButton user={user} /> {/* Pass user to UserButton */}
+              <div className="flex items-center gap-2">
+                <UserButton user={user} />
                 <DarkModeToggle />
               </div>
-
+            </nav>
+            <div className="sm:hidden container mx-auto px-4 pb-4">
+              <Suspense fallback={null}>
+                <SearchInput />
+              </Suspense>
             </div>
           </header>
+
           <main className="flex-grow container mx-auto px-4 pb-8">
             {children}
           </main>
-          <Toaster richColors closeButton /> {/* Add Toaster for notifications */}
+          <Toaster richColors closeButton />
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />
