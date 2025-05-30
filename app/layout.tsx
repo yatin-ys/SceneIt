@@ -54,7 +54,7 @@ export default async function RootLayout({
                   href="/" 
                   className="flex items-center gap-2 transition-transform hover:scale-105"
                 >
-                  <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary-foreground bg-clip-text text-transparent">
+                  <h1 className="text-2xl font-bold tracking-tight">
                     SceneIt
                   </h1>
                 </Link>
