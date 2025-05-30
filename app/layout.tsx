@@ -12,6 +12,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from "@/components/ui/sonner";
 import { UserButton } from "@/components/auth/user-button";
 import { createClient } from "@/lib/supabase/server";
+import { Footer } from "@/components/footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -80,6 +81,8 @@ export default async function RootLayout({
           <main className="flex-grow container mx-auto px-4 pb-8">
             {children}
           </main>
+
+          <Footer />
           <Toaster richColors closeButton />
         </ThemeProvider>
         <Analytics />
