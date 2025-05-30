@@ -88,19 +88,19 @@ export async function getMovieDetails(movieId: string): Promise<MediaItem> {
 export async function getNowPlayingMovies(
   page: number = 1
 ): Promise<TMDBResponse> {
-  return fetchTMDB("movie/now_playing", { params: { page, region: "IN" } });
+  return fetchTMDB("movie/now_playing", { params: { page } });
 }
 
 export async function getPopularMovies(
   page: number = 1
 ): Promise<TMDBResponse> {
-  return fetchTMDB("movie/popular", { params: { page, region: "IN" } });
+  return fetchTMDB("movie/popular", { params: { page } });
 }
 
 export async function getTopRatedMovies(
   page: number = 1
 ): Promise<TMDBResponse> {
-  return fetchTMDB("movie/top_rated", { params: { page, region: "IN" } });
+  return fetchTMDB("movie/top_rated", { params: { page } });
 }
 
 export async function getUpcomingMovies(
