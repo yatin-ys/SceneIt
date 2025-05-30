@@ -187,31 +187,41 @@ export default async function MoviePage({
               </p>
             )}
 
-            <div className="flex flex-wrap gap-3 mb-6">
-              <Badge variant="outline">{releaseDate}</Badge>
-              <Badge variant="outline">{runtime}</Badge>
-              <Badge
-                variant={
-                  parseFloat(rating) >= 7
-                    ? "default"
-                    : parseFloat(rating) >= 5
-                    ? "secondary"
-                    : "destructive"
-                }
-              >
-                ★ {rating}
-              </Badge>
-              {movie.status && <Badge variant="outline">{movie.status}</Badge>}
-            </div>
+            {/* NEW Combined container for Badges and Watchlist Button */}
+            {/* - Stacks vertically on small screens (flex-col) with gap-y-6 (24px) */}
+            {/* - Arranges horizontally on sm screens and up (sm:flex-row) with gap-x-6 (24px) */}
+            {/* - Vertically centers items when horizontal (sm:items-center) */}
+            {/* - Maintains bottom margin before next section (mb-6) */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-x-6 gap-y-6 mb-6">
+              {/* Badges Section */}
+              <div className="flex flex-wrap gap-3">
+                <Badge variant="outline">{releaseDate}</Badge>
+                <Badge variant="outline">{runtime}</Badge>
+                <Badge
+                  variant={
+                    parseFloat(rating) >= 7
+                      ? "default"
+                      : parseFloat(rating) >= 5
+                      ? "secondary"
+                      : "destructive"
+                  }
+                >
+                  ★ {rating}
+                </Badge>
+                {movie.status && <Badge variant="outline">{movie.status}</Badge>}
+              </div>
 
-            <div className="my-6">
-              <WatchlistButton
-                movieId={movieIdNum}
-                user={user}
-                // initialIsInWatchlist prop is no longer passed
-                className="w-full sm:w-auto"
-                size="lg"
-              />
+              {/* Watchlist Button Section Wrapper */}
+              {/* - On sm screens and up, pushes to the far right of this flex container (sm:ml-auto) */}
+              {/* - Wrapper takes full width on small screens, auto width on sm+ */}
+              <div className="w-full sm:w-auto sm:ml-auto">
+                <WatchlistButton
+                  movieId={movieIdNum}
+                  user={user}
+                  className="w-full sm:w-auto" // Button fills its wrapper
+                  size="lg" // Keeps the button visually large as before
+                />
+              </div>
             </div>
 
             {movie.genres && movie.genres.length > 0 && (
