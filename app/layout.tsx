@@ -48,7 +48,7 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <nav className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
+            <nav className="container mx-auto px-4 h-16 flex items-center gap-4">
               <div className="flex items-center gap-4 lg:gap-6 flex-1">
                 <Link 
                   href="/" 
@@ -58,16 +58,18 @@ export default async function RootLayout({
                     SceneIt
                   </h1>
                 </Link>
-                <Link
-                  href="/discover"
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden sm:block"
-                >
-                  Discover
-                </Link>
-                <div className="hidden sm:block w-full max-w-md">
-                  <Suspense fallback={null}>
-                    <SearchInput />
-                  </Suspense>
+                <div className="flex items-center gap-6">
+                  <Link
+                    href="/discover"
+                    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Discover
+                  </Link>
+                  <div className="hidden sm:block w-full max-w-md">
+                    <Suspense fallback={null}>
+                      <SearchInput />
+                    </Suspense>
+                  </div>
                 </div>
               </div>
 
@@ -77,14 +79,6 @@ export default async function RootLayout({
               </div>
             </nav>
             <div className="sm:hidden container mx-auto px-4 pb-4">
-              <div className="flex items-center gap-4 mb-4">
-                <Link
-                  href="/discover"
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Discover
-                </Link>
-              </div>
               <Suspense fallback={null}>
                 <SearchInput />
               </Suspense>
