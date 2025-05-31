@@ -58,6 +58,12 @@ export default async function RootLayout({
                     SceneIt
                   </h1>
                 </Link>
+                <Link
+                  href="/discover"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden sm:block"
+                >
+                  Discover
+                </Link>
                 <div className="hidden sm:block w-full max-w-md">
                   <Suspense fallback={null}>
                     <SearchInput />
@@ -71,6 +77,14 @@ export default async function RootLayout({
               </div>
             </nav>
             <div className="sm:hidden container mx-auto px-4 pb-4">
+              <div className="flex items-center gap-4 mb-4">
+                <Link
+                  href="/discover"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Discover
+                </Link>
+              </div>
               <Suspense fallback={null}>
                 <SearchInput />
               </Suspense>
