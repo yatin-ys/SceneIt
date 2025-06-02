@@ -21,7 +21,7 @@ export function MediaCard({ item, mediaType }: MediaCardProps) {
     : `/shows/${item.id}`;
 
   return (
-    <Link href={href} className="block">
+    <Link href={href} className="block" prefetch={false}>
       <div className="w-36 sm:w-40 md:w-44 flex flex-col flex-shrink-0 rounded-lg shadow-md overflow-hidden bg-card hover-lift animate-fade-in">
         <div
           className="relative w-full overflow-hidden rounded-t-lg"
