@@ -86,18 +86,16 @@ function SceneItButtonContent({
       try {
         if (previousState) {
           const result = await removeFromWatched(movieId, mediaType);
-          if (!result.success)
-            throw new Error(result.error || "Failed to remove.");
-          toast.success("Removed from your Scene'd list.");
+          if (!result.success) throw new Error(result.error || "Failed to remove.");
+          toast.success("Removed from your Scene list.");
         } else {
           const result = await addToWatched(movieId, mediaType);
-          if (!result.success)
-            throw new Error(result.error || "Failed to add.");
+          if (!result.success) throw new Error(result.error || "Failed to add.");
           if (result.alreadyExists) {
-            toast.info("Already in your Scene'd list.");
+            toast.info("Already in your Scene list.");
             setIsInWatched(true);
           } else {
-            toast.success("Added to your Scene'd list!");
+            toast.success("Added to your Scene list!");
           }
         }
       } catch (e: unknown) {
@@ -140,7 +138,7 @@ function SceneItButtonContent({
       {isPendingAction
         ? "Updating..."
         : isInWatched
-        ? "Scene'd It"
+        ? "Scene It"
         : "Scene It"}
     </Button>
   );
