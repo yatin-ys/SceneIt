@@ -11,8 +11,10 @@ import { Badge } from "@/components/ui/badge";
 import { PaginationLink } from "@/components/ui/pagination";
 import { notFound } from "next/navigation";
 import { WatchlistButton } from "@/components/watchlist-button";
+import { SceneItButton } from "@/components/sceneit-button"; // New Import
 import { createClient } from "@/lib/supabase/server";
-// import { isMovieInWatchlist } from "@/app/watchlist/actions"; // No longer needed for server-side check here
+import { isMovieInWatchlist } from "@/app/watchlist/actions"; // Import for server check
+import { isMovieInWatched } from "@/app/watched/actions"; // New Import for server check
 import type { Metadata } from "next";
 
 const IMAGE_BASE_URL =
@@ -120,15 +122,25 @@ export default async function MoviePage({
   const supabase = await createClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser(); // Still fetch user to pass to WatchlistButton
+  } = await supabase.auth.getUser();
 
-  // REMOVED: Server-side watchlist check
-  // let initialIsInWatchlist: boolean | undefined = undefined;
-  // if (user) {
-  //   initialIsInWatchlist = await isMovieInWatchlist(movieIdNum);
-  // } else {
-  //   initialIsInWatchlist = false;
-  // }
+  // Pre-fetch button states on the server if the user is logged in
+  let initialIsInWatchlist: boolean | undefined = undefined;
+  let initialIsInWatched: boolean | undefined = undefined;
+
+  if (user) {
+    // Fetch statuses in parallel for better performance
+    const [inWatchlist, inWatched] = await Promise.all([
+      isMovieInWatchlist(movieIdNum),
+      isMovieInWatched(movieIdNum),
+    ]);
+    initialIsInWatchlist = inWatchlist;
+    initialIsInWatched = inWatched;
+  } else {
+    // If no user, they are not in either list
+    initialIsInWatchlist = false;
+    initialIsInWatched = false;
+  }
 
   const releaseDate = movie.release_date
     ? new Date(movie.release_date).toLocaleDateString("en-US", {
@@ -187,11 +199,6 @@ export default async function MoviePage({
               </p>
             )}
 
-            {/* NEW Combined container for Badges and Watchlist Button */}
-            {/* - Stacks vertically on small screens (flex-col) with gap-y-6 (24px) */}
-            {/* - Arranges horizontally on sm screens and up (sm:flex-row) with gap-x-6 (24px) */}
-            {/* - Vertically centers items when horizontal (sm:items-center) */}
-            {/* - Maintains bottom margin before next section (mb-6) */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-x-6 gap-y-6 mb-6">
               {/* Badges Section */}
               <div className="flex flex-wrap gap-3">
@@ -208,18 +215,26 @@ export default async function MoviePage({
                 >
                   ★ {rating}
                 </Badge>
-                {movie.status && <Badge variant="outline">{movie.status}</Badge>}
+                {movie.status && (
+                  <Badge variant="outline">{movie.status}</Badge>
+                )}
               </div>
 
-              {/* Watchlist Button Section Wrapper */}
-              {/* - On sm screens and up, pushes to the far right of this flex container (sm:ml-auto) */}
-              {/* - Wrapper takes full width on small screens, auto width on sm+ */}
-              <div className="w-full sm:w-auto sm:ml-auto">
+              {/* Combined Buttons Wrapper */}
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto sm:ml-auto">
                 <WatchlistButton
                   movieId={movieIdNum}
                   user={user}
-                  className="w-full sm:w-auto" // Button fills its wrapper
-                  size="lg" // Keeps the button visually large as before
+                  className="w-full sm:w-auto"
+                  size="lg"
+                  initialIsInWatchlist={initialIsInWatchlist}
+                />
+                <SceneItButton
+                  movieId={movieIdNum}
+                  user={user}
+                  className="w-full sm:w-auto"
+                  size="lg"
+                  initialIsInWatched={initialIsInWatched}
                 />
               </div>
             </div>
