@@ -1,0 +1,27 @@
+# Don't include your environment variables
+.env
+
+# Don't include node_modules — it's installed in the Docker image
+node_modules
+
+# Ignore build output
+.next
+out
+
+# Ignore local development files
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+*.swp
+*.swo
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Git and VCS
+.git
+.gitignore
+
+# Docker-specific
+docker-compose.override.yml

@@ -61,6 +61,7 @@ export function MediaGrid({
           <Link
             href={moreLinkHref}
             className="text-sm text-primary hover:underline whitespace-nowrap ml-4"
+            prefetch={false}
           >
             View More
           </Link>
@@ -95,6 +96,7 @@ export function MediaGrid({
           <Link
             href={moreLinkHref}
             className="text-sm text-primary hover:underline whitespace-nowrap ml-4"
+            prefetch={false}
           >
             View More
           </Link>
