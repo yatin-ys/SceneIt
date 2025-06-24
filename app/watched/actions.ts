@@ -64,8 +64,7 @@ export async function addToWatched(
 
   // Revalidate paths that might display this info
   revalidatePath(`/movies/detail/${movieId}`);
-  // You might want to create a `/watched` page in the future
-  // revalidatePath("/watched");
+  revalidatePath("/watched");
   return { success: true };
 }
 
@@ -99,7 +98,7 @@ export async function removeFromWatched(
   }
 
   revalidatePath(`/movies/detail/${movieId}`);
-  // revalidatePath("/watched");
+  revalidatePath("/watched");
   return { success: true };
 }
 
@@ -130,4 +129,32 @@ export async function isMovieInWatched(
   }
 
   return (count ?? 0) > 0;
+}
+
+// Action to get all watched items for the current user
+export async function getWatchedItems(): Promise<{
+  data?: WatchedDbItem[];
+  error?: string;
+}> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "User not authenticated." };
+  }
+
+  const { data, error } = await supabase
+    .from("user_watched_movies")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("watched_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching watched items:", error);
+    return { error: "Could not fetch watched list." };
+  }
+
+  return { data: data as WatchedDbItem[] };
 }
