@@ -14,7 +14,14 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/app/auth/actions";
-import { LogOut, LogIn, UserPlus, UserCircle, ListVideo } from "lucide-react"; // Added UserCircle, ListVideo
+import {
+  LogOut,
+  LogIn,
+  UserPlus,
+  UserCircle,
+  ListVideo,
+  Clapperboard,
+} from "lucide-react";
 import { toast } from "sonner";
 
 interface UserButtonProps {
@@ -92,6 +99,12 @@ export function UserButton({ user }: UserButtonProps) {
           <Link href="/watchlist" className="cursor-pointer">
             <ListVideo className="mr-2 h-4 w-4" />
             <span>My Watchlist</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/watched" className="cursor-pointer">
+            <Clapperboard className="mr-2 h-4 w-4" />
+            <span>Scene It</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
