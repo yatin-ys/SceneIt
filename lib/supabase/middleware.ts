@@ -1,6 +1,5 @@
-// lib/supabase/middleware.ts
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({
@@ -55,8 +54,7 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // Refresh session if expired - important for Server Components
-  // https://supabase.com/docs/guides/auth/server-side/nextjs
+  // This will refresh the session if it's expired
   await supabase.auth.getUser();
 
   return response;
