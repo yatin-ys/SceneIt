@@ -2,7 +2,7 @@
 
 SceneIt is a modern movie tracking web application that allows users to discover, search, and keep track of movies they want to watch. Built with Next.js, Supabase, and the TMDB API, it offers a sleek, responsive interface with features like user authentication, personalized watchlists, and detailed movie information.
 
-Live - https://sceneit.yatin-ys.tech/
+Live - https://sceneit.yatin-ys.xyz/
 
 ## ✨ Features
 
